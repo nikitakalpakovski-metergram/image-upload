@@ -4,15 +4,15 @@ import { api } from "../utils/api";
 import React from "react";
 
 const Home: NextPage = () => {
-  const [data, setData] = React.useState<string[]>([]);
+  const [data, setData] = React.useState<{ key: string }[]>([]);
   const $fileInput = React.useRef<HTMLInputElement>(null);
-  const uploadImage = api.example.uploadImage.useMutation({
+  const uploadImage = api.example.getUploadSignedUrls.useMutation({
     onSuccess: async (data, variables) => {
       await Promise.all(
         data.map((url, index) =>
           fetch(url, {
             method: "PUT",
-            body: variables[index]!,
+            body: variables[index]!.key,
           })
         )
       );
@@ -21,7 +21,7 @@ const Home: NextPage = () => {
     },
   });
 
-  const getImages = api.example.getImages.useQuery(data);
+  const getImages = api.example.getDownloadSignedUrls.useQuery(data);
 
   return (
     <>
@@ -42,7 +42,7 @@ const Home: NextPage = () => {
             }
             const value = $fileInput.current.value;
             const fileNames = value.split(",");
-            uploadImage.mutate(fileNames);
+            uploadImage.mutate(fileNames.map((key) => ({ key })));
           }}
         >
           Get upload urls
@@ -52,7 +52,7 @@ const Home: NextPage = () => {
         <pre>
           {getImages.data?.map((url) => (
             <React.Fragment key={url.url}>
-              <strong>{url.name}</strong>
+              <strong>{url.key}</strong>
               <br />
               <span>{url.url}</span>
               <br />

@@ -5,25 +5,22 @@ import { s3 } from "../../lib/aws";
 import { env } from "../../../env/server.mjs";
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
-export const exampleRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
+const signedUrlSchema = z.object({
+  // The name of the file in the S3 bucket
+  key: z.string(),
+});
 
-  uploadImage: publicProcedure
-    .input(z.array(z.string()))
+export const exampleRouter = createTRPCRouter({
+  getUploadSignedUrls: publicProcedure
+    .input(z.array(signedUrlSchema))
     .mutation(async ({ input }) => {
       return Promise.all(
-        input.map((name) =>
+        input.map(({ key }) =>
           getSignedUrl(
             s3,
             new PutObjectCommand({
               Bucket: env.AWS_BUCKET_NAME,
-              Key: name,
+              Key: key,
             }),
             {
               expiresIn: 3600,
@@ -33,16 +30,16 @@ export const exampleRouter = createTRPCRouter({
       );
     }),
 
-  getImages: publicProcedure
-    .input(z.array(z.string()))
+  getDownloadSignedUrls: publicProcedure
+    .input(z.array(signedUrlSchema))
     .query(async ({ input }) => {
       const result = await Promise.all(
-        input.map((name) =>
+        input.map(({ key }) =>
           getSignedUrl(
             s3,
             new GetObjectCommand({
               Bucket: env.AWS_BUCKET_NAME,
-              Key: name,
+              Key: key,
             }),
             {
               expiresIn: 3600,
@@ -52,7 +49,7 @@ export const exampleRouter = createTRPCRouter({
       );
 
       return result.map((url, index) => ({
-        name: input[index]!,
+        key: input[index]!.key,
         url,
       }));
     }),
