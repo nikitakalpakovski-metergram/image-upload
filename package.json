@@ -9,11 +9,14 @@
     "start": "next start"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.241.0",
+    "@aws-sdk/s3-request-presigner": "^3.241.0",
     "@tanstack/react-query": "^4.20.0",
     "@trpc/client": "^10.7.0",
     "@trpc/next": "^10.7.0",
     "@trpc/react-query": "^10.7.0",
     "@trpc/server": "^10.7.0",
+    "aws-sdk": "^2.1287.0",
     "next": "13.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -28,6 +31,7 @@
     "@typescript-eslint/parser": "^5.47.1",
     "eslint": "^8.30.0",
     "eslint-config-next": "13.1.1",
+    "prettier": "^2.8.1",
     "typescript": "^4.9.4"
   },
   "ct3aMetadata": {
